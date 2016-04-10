@@ -1,0 +1,332 @@
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<style>
+		h1, h2
+		{
+			color: #444444;
+			text-shadow: 3px 3px 3px #CCCCCC;
+			font-family: Verdana;
+		}
+		pre
+		{
+			font-family:Helvetica, Arial, sans-serif
+		}
+		.log
+		{
+			height: 300px;
+			overflow:scroll;
+		}
+		.logEntry
+		{
+			display:block;
+			line-height: 25px;
+		}
+		a{
+			text-decoration:none;
+		}
+		table { 
+		color: #333;
+		font-family: Helvetica, Arial, sans-serif;
+		width: 100%; 
+		border-collapse: 
+		collapse; border-spacing: 0; 
+		}
+
+		td, th { 
+		border: 1px solid transparent; /* No more visible border */
+		height: 30px; 
+		transition: all 0.3s;  /* Simple transition for hover effect */
+		}
+		th {
+		background: #DFDFDF;  /* Darken header a bit */
+		font-weight: bold;
+		}
+		td {
+		background: #FAFAFA;
+		text-align: left;
+		padding: 7px;
+		height:45px;
+
+		}
+
+		/* Cells in even rows (2,4,6...) are one color */ 
+		tr:nth-child(even) td { background: #F1F1F1; }   
+
+		/* Cells in odd rows (1,3,5...) are another (excludes header cells)  */ 
+		tr:nth-child(odd) td { background: #FEFEFE; }  
+
+		tr td:hover { background: #666; color: #FFF; } /* Hover cell effect! */
+
+		input, select{
+		  padding: 10px;
+		  border: solid 1px #dcdcdc;
+		  transition: box-shadow 0.3s, border 0.3s;
+		  width:100%;
+		}
+		input:focus,
+		input.focus,
+		select:focus{
+		  border: solid 1px #707070;
+		  box-shadow: 0 0 5px 1px #969696;
+		}		
+	</style>
+<script>
+
+	//set default values for the form.
+	
+	var basePowerAttackDamage = 6; // gain  a  +6  bonus  on  all  melee damage rolls
+	var secondaryPowerAttackBonus = Math.floor(basePowerAttackDamage / 2); //This  bonus  to  damage  is increased by half (+50%) if you are making an attack with a two-handed weapon (just set to 0 if not)
+	var strengthBonus = 6; //char sheet
+	var baseWeaponDice = 1; //bardich has 1 attack dice normally. 
+	var rageStrengthBonus = 2; //get two additional strength from rage (just set to 0 if not raging)
+	var diceType = 'D10'; //what kind of dice the weapon rolls
+	var twoHanded = true;
+	var additionalWeaponDamage = 1;
+	var secondaryPowerAttackBuffApplies = true;
+	var vitalStrikeType = 'Mythic';
+	
+	
+	
+	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
+	$( document ).ready(function(){
+		$('input[data-bound="true"][type="number"]').each(function(){
+			try
+			{
+				console.log($(this).attr('name'));
+				var boundVar = $(this).attr('name');
+				
+				$(this).val(parseFloat(window[boundVar].toPrecision(4)));
+				
+				
+				$(this).bind('keyup change',function(){
+					var boundVar = $(this).attr('name');
+					
+					window[boundVar] = parseFloat($(this).val());
+					
+					calcDamageString();
+				});
+			}
+			catch(ex)
+			{
+				console.log('Error');
+				console.log(ex);
+			}
+		});
+
+		$('input[data-bound="true"][type="checkbox"]').each(function(){
+			var boundVar = $(this).attr('name');
+			
+			$(this).prop('checked',boundVar);
+			
+			
+			$(this).click(function(){
+				var boundVar = $(this).attr('name');
+				
+				window[boundVar] = $(this).is(":checked");
+				
+				calcDamageString();
+			});
+		});
+		
+		$('#diceType').val(diceType).change(function(){
+			diceType = $(this).val();
+			calcDamageString();
+		});
+
+		$('#vitalStrikeType').val(vitalStrikeType).change(function(){
+			vitalStrikeType = $(this).val();
+			calcDamageString();
+		});		
+		
+		
+		$('#secondaryPowerAttackBuffApplies').click(function(){
+			console.log('Function called');
+			if($(this).is(":checked"))
+			{
+				$('#powerAttackBuff').show();
+			}
+			else
+			{
+				$('#powerAttackBuff').hide();
+			}
+		});
+		calcDamageString();
+	})
+
+	function getVitalStrikeMultiplier(strikeType)
+	{
+		strikeType = strikeType.toLowerCase();
+		if(strikeType == 'basic')
+		{
+			return 2;
+		}
+		if(strikeType == 'mythic')
+		{
+			return 2;
+		}
+		if(strikeType == 'improved')
+		{
+			return 3;
+		}
+		if(strikeType == 'greater')
+		{
+			return 4;
+		}
+		
+	}
+	//uses all the set values to calculate the total damage for the mythic vital power attack.
+	function calcDamageString()
+	{
+		//total strength bonus is base strength plus rage strength
+		var totalStrengthBonus = strengthBonus + rageStrengthBonus;
+		
+		var vitalStrikeMultiplier = getVitalStrikeMultiplier(vitalStrikeType)
+		
+		//if the weapon is being weilded two handed a 1.5 strength buff is applied.
+		if(twoHanded)
+		{
+			totalStrengthBonus = totalStrengthBonus * 1.5; //when using two handed weapon strength is multiplied by 1.5 //http://www.d20pfsrd.com/gamemastering/combat#TOC-Damage
+		}
+		
+		//the number of dice rolled for the damage is the base number of dice times 2
+		var numDice = baseWeaponDice * vitalStrikeMultiplier; 
+		
+		//the final damage bonus is calculated as such
+		var damageBonus = totalStrengthBonus + basePowerAttackDamage + additionalWeaponDamage;
+		
+		//If the secondary power attack buff applies add it to the total now.
+		if(secondaryPowerAttackBuffApplies)
+		{
+			damageBonus += secondaryPowerAttackBonus; //if not two handing weapon then we do not get the additional buff from power attack.
+		}
+		
+		//because basic vital strike does not multiple bonuses from strength, weapon abilities, etc while the other advanced mythic strike abilities do
+		//do different math is required here. This is just a placeholder to remind me to come back and modify this.
+		if(vitalStrikeType == 'basic')
+		{
+		
+		}
+		var damageBonus = damageBonus * vitalStrikeMultiplier;
+		
+		//put it into a string.
+		var resultDamageString = numDice + ' ' + diceType + ' + ' + damageBonus;
+		$('#output').html(resultDamageString);
+	}
+</script>
+<body>
+	<center>
+		<h1>Mythic Vital Power Attack Damage Calculator</h1>
+	</center>
+	<p>
+	<pre>
+	Power Attack
+
+	You  can  make  exceptionally  deadly  melee  attacks  by  sacrificing  accuracy  for
+	strength. You can choose to take a -3 penalty on all melee attack rolls and combat maneuver checks  to  gain  a  +6  bonus  on  all  melee  
+	damage  rolls.  This  bonus  to  damage  is increased by half (+50%) if you are making an attack with a two-handed weapon, a
+	one  handed  weapon  using  two  hands,  or  a  primary  natural  weapon  that  adds  1-1/2times your Strength modifier on damage rolls. 
+	This bonus to damage is halved (-50%)if  you  are  making  an  attack  with  an  off-hand  weapon  or  secondary  natural  weapon.
+	You must choose to use this feat before making an attack roll, and its effects last until your next turn. 
+	The bonus damage does not apply to touch attacks or effects that do not deal hit point damage
+
+	Vital Strike
+	
+	When you use the attack action, you can make one attack at your highest base attack bonus that deals additional damage. 
+	Roll the weapon's damage dice for the attack twice and add the results together before adding bonuses from Strength, weapon abilities (such as flaming), precision-based damage, and other damage bonuses. 
+	These extra weapon damage dice are not multiplied on a critical hit, but are added to the total.
+	
+	Vital Strike (Mythic)
+	
+	Benefit: Whenever you use Vital Strike, multiply the Strength bonus, magic bonus, and other bonuses that would normally be multiplied on a 
+	critical hit by the number of weapon damage dice you roll for that feat.
+	</pre>
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th width="20%">Attribute</th>
+				<th width="10%">Value</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tr>
+			<td>Vital Strike Type</td>
+			<td>
+				<select name="vitalStrikeType" id="vitalStrikeType">
+					<option>Basic</option>
+					<option>Mythic</option>
+					<option>Improved</option>
+					<option>Greater</option>
+				</select>
+			</td>
+			<td>What Tier is the vital strike at?</td>
+		</tr>
+		<tr>
+			<td>Base Strength Bonus</td>
+			<td><input name="strengthBonus" data-bound="true" type="number"></td>
+			<td>Characters base strength bonus</td>
+		</tr>	
+		<tr>
+			<td>Strength Bonus</td>
+			<td><input name="rageStrengthBonus" data-bound="true" type="number"></td>
+			<td>Characters additional strength from rage or other sources.</td>
+		</tr>		
+		<tr>
+			<td>Base Power Attack Damage</td>
+			<td><input name="basePowerAttackDamage" data-bound="true" type="number"></td>
+			<td>Damage added to attack from power attack basic ability.</td>
+		</tr>
+		<tr>
+			<td>Secondary Power Attack Buff Applies?</td>
+			<td><input name="secondaryPowerAttackBuffApplies" id="secondaryPowerAttackBuffApplies" data-bound="true" type="checkbox"></td>
+			<td>Does the secondary power attack buff apply to this situation?</td>
+		</tr>			
+		<tr id="powerAttackBuff">
+			<td>Power Attack Additional Bonus</td>
+			<td><input name="secondaryPowerAttackBonus" data-bound="true" type="number"></td>
+			<td>Additional damage from power attack if char meets the additional conditions, such as wielding weapon two handed.</td>
+		</tr>
+		<tr>
+			<td>Number of Weapon Dice</td>
+			<td><input name="baseWeaponDice" data-bound="true" type="number"></td>
+			<td>The number of damage dice rolled for this weapon</td>
+		</tr>	
+		<tr>
+			<td>Two Handed?</td>
+			<td><input name="twoHanded" data-bound="true" type="checkbox"></td>
+			<td>Is the weapon being weilded two handed?</td>
+		</tr>		
+		<tr>
+			<td>Additional Weapon Damage</td>
+			<td><input name="additionalWeaponDamage" data-bound="true" type="number"></td>
+			<td>Additional damage weapon does from magic, enchantment, flaming, etc</td>
+		</tr>		
+	
+		
+		<tr>
+			<td>Dice Type</td>
+			<td>
+				<select name="diceType" id="diceType">
+					<option>D4</option>
+					<option>D6</option>
+					<option>D8</option>
+					<option>D10</option>
+					<option>D12</option>
+					<option>D20</option>
+				</select>
+			</td>
+			<td>What kind of dice is rolled for this weapon</td>
+		</tr>	
+		<tr>
+			<td>Formula</td>
+			<td colspan="2">baseWeaponDice * 2 [dice type] + (totalStrengthBonus + basePowerAttackDamage + twoHandedPowerAttackBuff + additionalWeaponDamage) * numDice</td>
+		</tr>
+	</table>
+	
+	<center>
+		<h2>Total Calculated Damage: <span id="output"></span></h2>
+	</center>
+</body>
+</html>
+
+
