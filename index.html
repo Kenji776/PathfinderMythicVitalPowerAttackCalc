@@ -84,6 +84,7 @@
 	var additionalWeaponDamage = 1;
 	var secondaryPowerAttackBuffApplies = true;
 	var vitalStrikeType = 'Mythic';
+	var powerAttackType = 'Mythic';
 	
 	
 	
@@ -319,7 +320,7 @@
 		</tr>	
 		<tr>
 			<td>Formula</td>
-			<td colspan="2">baseWeaponDice * 2 [dice type] + (totalStrengthBonus + basePowerAttackDamage + twoHandedPowerAttackBuff + additionalWeaponDamage) * numDice</td>
+			<td colspan="2">baseWeaponDice * numDice [dice type] + (totalStrengthBonus + basePowerAttackDamage + twoHandedPowerAttackBuff + additionalWeaponDamage) * numDice</td>
 		</tr>
 	</table>
 	
