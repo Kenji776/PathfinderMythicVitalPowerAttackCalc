@@ -90,6 +90,7 @@
 	var critMultiplier = 2;
 	var additionalAttackBonus = 6;
 	var vitalStrikeIsMythic = true;
+	var applyFuriousFocus = true;
 	
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
 	$( document ).ready(function(){
@@ -228,6 +229,12 @@
 			thisAdjustment.baseDamageMod = basePowerAttackDamage;
 			thisAdjustment.bonusDamageMod = powerAttackDamageBonus;	
 			thisAdjustment.critMod = (thisAdjustment.baseDamageMod + thisAdjustment.bonusDamageMod) * 2;
+		}
+		
+		//furious focus feat negates attack roll debuff
+		if(applyFuriousFocus)
+		{
+			thisAdjustment.attackMod = 0;
 		}
 		
 		return thisAdjustment;
@@ -400,6 +407,11 @@
 			<td>Mythic Vital Strike?</td>
 			<td><input name="vitalStrikeIsMythic" id="vitalStrikeIsMythic" data-bound="true" type="checkbox"></td>
 			<td>Is this vital strike mythic?</td>
+		</tr>	
+		<tr>
+			<td>Apply Furious Focus Feat?</td>
+			<td><input name="applyFuriousFocus" id="applyFuriousFocus" data-bound="true" type="checkbox"></td>
+			<td>Does this character have furious focus? If so, the attack roll penalty from power attack is negated.</td>
 		</tr>	
 		<tr>
 			<td>Base Strength Bonus</td>
