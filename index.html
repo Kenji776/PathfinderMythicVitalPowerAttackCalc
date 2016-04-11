@@ -95,7 +95,7 @@
 	$( document ).ready(function(){
 		assignValuesFromUrl();
 
-		$('input[data-bound="true"]').each(function(){
+		$('input[data-bound="true"][type="text"]').each(function(){
 			try
 			{
 				var boundVar = $(this).attr('name');
@@ -107,6 +107,8 @@
 					var boundVar = $(this).attr('name');
 					
 					userVars[boundVar] = $(this).val();
+					
+					console.log('Calling calculate damage done from generic input field');
 					
 					calcDamageString();
 				});
@@ -131,6 +133,8 @@
 					
 					userVars[boundVar] = parseFloat($(this).val());
 					
+					console.log('Calling calculate damage done from number field change');
+					
 					calcDamageString();
 				});
 			}
@@ -142,15 +146,22 @@
 		});
 
 		$('input[data-bound="true"][type="checkbox"]').each(function(){
+			
+			
+			
 			var boundVar = $(this).attr('name');
 			
 
 			$(this).prop('checked',userVars[boundVar]);
 					
 			$(this).click(function(){
+				console.log('Checkbox clicked');
+				
 				var boundVar = $(this).attr('name');
 				
 				userVars[boundVar] = $(this).is(":checked");
+				
+				console.log('Calling calculate damage done from checkbox change');
 				
 				calcDamageString();
 			});
@@ -158,25 +169,19 @@
 		
 		$('#diceType').val(userVars.diceType).change(function(){
 			userVars.diceType = $(this).val();
+			console.log('Calling calculate damage done from diceType change');
 			calcDamageString();
 		});
 
 		$('#powerAttackType').val(userVars.powerAttackType).change(function(){
 			userVars.powerAttackType = $(this).val();
 			setPowerAttackValuesInForm(userVars.powerAttackType);
-			calcDamageString();
 		});
 		
 		$('#vitalStrikeType').val(userVars.vitalStrikeType).change(function(){
 			userVars.vitalStrikeType = $(this).val();
-			calcDamageString();
 		});		
 
-		$('#applyFuriousFocus').val(userVars.applyFuriousFocus).change(function(){
-			userVars.applyFuriousFocus = $(this).val();
-			calcDamageString();
-		});	
-		
 		
 		$('#secondaryPowerAttackBuffApplies').click(function(){
 			if($(this).is(":checked"))
@@ -248,6 +253,9 @@
 	{
 		
 		setPowerAttackValuesInForm($('#powerAttackType').val());
+		
+		console.log('Calling calculate damage done from init');
+		
 		calcDamageString();
 	}
 	
@@ -300,9 +308,9 @@
 			basePowerAttackDamage = 3;
 			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
 			basePowerAttackDamage += powerAttackLevel * 3;
-			attackRollModifier += -1 * userVars.powerAttackLevel;
+			attackRollModifier += -1 * powerAttackLevel;
 			var powerAttackDamageBonus = 0;
-			
+
 			if(userVars.secondaryPowerAttackBuffApplies)
 			{
 				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
@@ -315,7 +323,7 @@
 		}
 		
 		//furious focus feat negates attack roll debuff
-		if(applyFuriousFocus)
+		if(userVars.applyFuriousFocus)
 		{
 			thisAdjustment.attackMod = 0;
 		}
@@ -335,6 +343,7 @@
 	//uses all the set values to calculate the total damage for the mythic vital power attack.
 	function calcDamageString()
 	{
+		console.log('Calculate damage string called');
 		$('#log').html(null);
 		writeLogEntry('Running Calculations...');
 		
@@ -376,7 +385,7 @@
 		
 		
 		
-		if(userVars.applyFuriousFocus)
+		if(userVars.applyFuriousFocus == true)
 		{
 			writeLogEntry('Character has furious focus feat. Does not take attack roll penalty from power attack');
 		}
@@ -397,7 +406,7 @@
 
 		if(userVars.vitalStrikeIsMythic)
 		{
-			writeLogEntry('Vital Strike is mythic teir. Multiplying damage bonus by mythic vital strike multiplier');
+			writeLogEntry('Vital Strike is mythic tier. Multiplying damage bonus by mythic vital strike multiplier');
 			
 			var finalDamageBonus = damageBonus * vitalStrikeMultiplier;
 			
@@ -424,6 +433,8 @@
 		var linkUrl = generateUrlString();
 		
 		$('#hotLinkUrl').html('<a href="'+linkUrl+'">'+linkUrl+'</a>');
+		
+		console.log('Calculating damage done');
 	}
 	
 	function combatAdjustment()
@@ -483,12 +494,12 @@
 		</thead>
 		<tr>
 			<td>Character Name</td>
-			<td><input name="charName" id="charName" data-bound="true"></td>
+			<td><input name="charName" id="charName" type="text" data-bound="true"></td>
 			<td>Name of this character. Used for generating bookmark link</td>
 		</tr>
 		<tr>
 			<td>Weapon Name</td>
-			<td><input name="weaponName" id="weaponName" data-bound="true"></td>
+			<td><input name="weaponName" id="weaponName" type="text" data-bound="true"></td>
 			<td>What weapon is this calculation for. Used for generationg bookmark link</td>
 		</tr>		
 		<tr>
@@ -565,7 +576,7 @@
 		<tr>
 			<td>Two Handed?</td>
 			<td><input name="twoHanded" data-bound="true" type="checkbox"></td>
-			<td>Is the weapon being weilded two handed?</td>
+			<td>Is the weapon being wielded two handed?</td>
 		</tr>		
 		<tr>
 			<td>Additional Weapon Damage</td>
