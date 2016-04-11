@@ -198,7 +198,7 @@
 	
 	function generateUrlString()
 	{
-		url =  window.location.pathname +'?saved=true';
+		url =  window.location.protocol + "//" +window.location.host +'/'+ window.location.pathname +'?saved=true';
 		
 		for(key in userVars)
 		{
