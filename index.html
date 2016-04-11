@@ -95,12 +95,15 @@
 	
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
 	$( document ).ready(function(){
+		assignValuesFromUrl();
+		
 		$('input[data-bound="true"][type="number"]').each(function(){
 			try
 			{
 				var boundVar = $(this).attr('name');
 				
-				$(this).val(parseFloat(userVars[boundVar].toPrecision(4)));
+				console.log('Attempting to assing value ' +  userVars[boundVar]);
+				$(this).val(parseFloat(userVars[boundVar]));
 				
 				
 				$(this).bind('keyup change',function(){
@@ -132,7 +135,7 @@
 			});
 		});
 		
-		$('#diceType').val(diceType).change(function(){
+		$('#diceType').val(userVars.diceType).change(function(){
 			userVars.diceType = $(this).val();
 			calcDamageString();
 		});
@@ -168,20 +171,34 @@
 	{
 		var urlParams = readValuesFromUrl();
 		
+		console.log('Got url params');
+		console.log(urlParams);
 		for(param in urlParams)
 		{
-			if(window.hasOwnProperty(param))
+			if(userVars.hasOwnProperty(param))
 			{
-				console.log('Assigning url param ' + param + ' to local variable');
+				console.log('Assigning url param ' + param + ' with value ' + urlParams[param]);
 				
-				userVars[param] = urlParams[param];
+				if(typeof userVars[param] == 'number')
+				{
+					userVars[param] = parseFloat(urlParams[param]);
+				}
+				else if(typeof userVars[param] == 'boolean')
+				{
+					console.log('Boolean value ' + param + ' detected');
+					userVars[param] = urlParams[param] == "true" ? true : false;
+				}
+				else
+				{
+					userVars[param] = urlParams[param];
+				}
 			}
 		}
 	}
 	
 	function generateUrlString()
 	{
-		url = window.location.hostname;
+		url =  window.location.pathname +'?saved=true';
 		
 		for(key in userVars)
 		{
@@ -206,7 +223,7 @@
 	
 	function init()
 	{
-		//assignValuesFromUrl();
+		
 		setPowerAttackValuesInForm($('#powerAttackType').val());
 		calcDamageString();
 	}
@@ -245,7 +262,7 @@
 			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
 			basePowerAttackDamage += powerAttackLevel * 2;
 			attackRollModifier += -1 * powerAttackLevel;
-			
+			var powerAttackDamageBonus = 0;
 			if(userVars.secondaryPowerAttackBuffApplies)
 			{
 				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
@@ -261,6 +278,7 @@
 			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
 			basePowerAttackDamage += powerAttackLevel * 3;
 			attackRollModifier += -1 * userVars.powerAttackLevel;
+			var powerAttackDamageBonus = 0;
 			
 			if(userVars.secondaryPowerAttackBuffApplies)
 			{
@@ -343,11 +361,6 @@
 			writeLogEntry('Character takes ' + powerAttackMod.attackMod + ' to attack roll from power attack');
 		}
 		//the final damage bonus is calculated as such
-		console.log('damage bonus stats');
-		console.log(totalStrengthBonus);
-		console.log(powerAttackMod.baseDamageMod);
-		console.log(powerAttackMod.bonusDamageMod);
-		console.log(userVars.additionalWeaponDamage);
 		var damageBonus = totalStrengthBonus + powerAttackMod.baseDamageMod + powerAttackMod.bonusDamageMod + userVars.additionalWeaponDamage;
 		
 		writeLogEntry('Total Damage Bonus Calculated as total strength bonus + power attack base damage + power attack bonus damage + additional weapon damage: ' + totalStrengthBonus + ' + ' + powerAttackMod.baseDamageMod + ' + ' +  powerAttackMod.bonusDamageMod + ' + ' +  userVars.additionalWeaponDamage + ' = ' + damageBonus);
@@ -358,7 +371,7 @@
 		
 		//calculation of the additional vital strike damage is tricky. Mythic vital strike includes all bonuses before multiplication. Other vital strikes do not.
 		var finalDamageBonus = damageBonus;
-		console.log('Final damage bonus end -1' + finalDamageBonus);
+
 		if(userVars.vitalStrikeIsMythic)
 		{
 			writeLogEntry('Vital Strike is mythic teir. Multiplying damage bonus by mythic vital strike multiplier');
@@ -372,7 +385,7 @@
 			writeLogEntry('Non mythic vital strike. Not multiplying damages');
 		}
 		//put it into a string.
-		console.log('Final damage bonus end ' + finalDamageBonus);
+
 		var resultDamageString = numDice + ' ' + userVars.diceType + ' + ' + finalDamageBonus;
 		
 		//additional dice from vital strike are not included in crit calculations.
@@ -559,7 +572,7 @@
 	</div>	
 	
 	<div>
-		Bookmark URL: <span id="hotLinkUrl"></span>
+		<h2>Bookmark Link</h2> <span id="hotLinkUrl"></span>
 	</div>	
 </body>
 </html>
