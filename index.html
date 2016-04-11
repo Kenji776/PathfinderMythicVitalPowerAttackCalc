@@ -124,7 +124,8 @@
 		$('input[data-bound="true"][type="checkbox"]').each(function(){
 			var boundVar = $(this).attr('name');
 			
-			$(this).prop('checked',boundVar);
+
+			$(this).prop('checked',userVars[boundVar]);
 					
 			$(this).click(function(){
 				var boundVar = $(this).attr('name');
@@ -150,6 +151,11 @@
 			userVars.vitalStrikeType = $(this).val();
 			calcDamageString();
 		});		
+
+		$('#applyFuriousFocus').val(userVars.applyFuriousFocus).change(function(){
+			userVars.applyFuriousFocus = $(this).val();
+			calcDamageString();
+		});	
 		
 		
 		$('#secondaryPowerAttackBuffApplies').click(function(){
@@ -170,9 +176,7 @@
 	function assignValuesFromUrl()
 	{
 		var urlParams = readValuesFromUrl();
-		
-		console.log('Got url params');
-		console.log(urlParams);
+
 		for(param in urlParams)
 		{
 			if(userVars.hasOwnProperty(param))
@@ -185,7 +189,6 @@
 				}
 				else if(typeof userVars[param] == 'boolean')
 				{
-					console.log('Boolean value ' + param + ' detected');
 					userVars[param] = urlParams[param] == "true" ? true : false;
 				}
 				else
