@@ -74,7 +74,8 @@
 
 	//set default values for the form.
 	var userVars = new Object();
-	
+	userVars.charName = 'Erigdush';
+	userVars.weaponName = 'Bardiche';
 	userVars.strengthBonus = 6; //char sheet
 	userVars.baseAttackBonus = 8;
 	userVars.baseWeaponDice = 1; //bardich has 1 attack dice normally. 
@@ -93,13 +94,35 @@
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
 	$( document ).ready(function(){
 		assignValuesFromUrl();
+
+		$('input[data-bound="true"]').each(function(){
+			try
+			{
+				var boundVar = $(this).attr('name');
+				
+				$(this).val(userVars[boundVar]);
+				
+				
+				$(this).bind('keyup change',function(){
+					var boundVar = $(this).attr('name');
+					
+					userVars[boundVar] = $(this).val();
+					
+					calcDamageString();
+				});
+			}
+			catch(ex)
+			{
+				console.log('Error');
+				console.log(ex);
+			}
+		});
 		
 		$('input[data-bound="true"][type="number"]').each(function(){
 			try
 			{
 				var boundVar = $(this).attr('name');
 				
-				console.log('Attempting to assing value ' +  userVars[boundVar]);
 				$(this).val(parseFloat(userVars[boundVar]));
 				
 				
@@ -178,19 +201,19 @@
 		{
 			if(userVars.hasOwnProperty(param))
 			{
-				console.log('Assigning url param ' + param + ' with value ' + urlParams[param]);
+				var urlVal = decodeURIComponent( urlParams[param] );
 				
 				if(typeof userVars[param] == 'number')
 				{
-					userVars[param] = parseFloat(urlParams[param]);
+					userVars[param] = parseFloat(urlVal);
 				}
 				else if(typeof userVars[param] == 'boolean')
 				{
-					userVars[param] = urlParams[param] == "true" ? true : false;
+					userVars[param] = urlVal == "true" ? true : false;
 				}
 				else
 				{
-					userVars[param] = urlParams[param];
+					userVars[param] = urlVal;
 				}
 			}
 		}
@@ -202,7 +225,7 @@
 		
 		for(key in userVars)
 		{
-			url += '&'+key+'='+userVars[key];
+			url += '&'+key+'='+encodeURIComponent(userVars[key]);
 		}
 		
 		return url;
@@ -459,6 +482,16 @@
 			</tr>
 		</thead>
 		<tr>
+			<td>Character Name</td>
+			<td><input name="charName" id="charName" data-bound="true"></td>
+			<td>Name of this character. Used for generating bookmark link</td>
+		</tr>
+		<tr>
+			<td>Weapon Name</td>
+			<td><input name="weaponName" id="weaponName" data-bound="true"></td>
+			<td>What weapon is this calculation for. Used for generationg bookmark link</td>
+		</tr>		
+		<tr>
 			<td>Power Attack Type</td>
 			<td>
 				<select name="powerAttackType" id="powerAttackType">
@@ -492,7 +525,7 @@
 		<tr>
 			<td>Base Strength Bonus</td>
 			<td><input name="strengthBonus" data-bound="true" type="number"></td>
-			<td>Characters base strength bonus</td>
+			<td>Characters base strength bonus (strength ability modifier)</td>
 		</tr>	
 		<tr>
 			<td>Additional Strength Bonus</td>
