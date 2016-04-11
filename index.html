@@ -169,17 +169,8 @@
 		
 		//if the two handed checkbox is checked, the secondary power attack bonus must be checked as well.
 		$('#twoHanded').click(function(){
-			if($(this).is(":checked"))
-			{
-				secondaryPowerAttackBuffApplies = true;
-				$('#secondaryPowerAttackBuffApplies').prop('checked',true).attr('disabled',true).attr('title','Locked because two handed is checked');
-				$('#powerAttackBuff').show();
-			}
-			else
-			{
-				$('#secondaryPowerAttackBuffApplies').removeAttr('disabled',true).removeAttr('title','Locked because two handed is checked');
-			}
-		}).click();
+			twoHandedHandler($(this).is(":checked"));
+		});
 		
 		$('#diceType').val(userVars.diceType).change(function(){
 			userVars.diceType = $(this).val();
@@ -212,6 +203,19 @@
 		
 	})
 
+	function twoHandedHandler(isChecked)
+	{
+		if(isChecked)
+		{
+			secondaryPowerAttackBuffApplies = true;
+			$('#secondaryPowerAttackBuffApplies').prop('checked',true).attr('disabled',true).attr('title','Locked because two handed is checked');
+			$('#powerAttackBuff').show();
+		}
+		else
+		{
+			$('#secondaryPowerAttackBuffApplies').removeAttr('disabled',true).removeAttr('title','Locked because two handed is checked');
+		}	
+	}
 	function assignValuesFromUrl()
 	{
 		var urlParams = readValuesFromUrl();
@@ -268,8 +272,8 @@
 		
 		setPowerAttackValuesInForm($('#powerAttackType').val());
 		
-		console.log('Calling calculate damage done from init');
-		
+		twoHandedHandler($('#twoHanded').is(":checked"))
+
 		calcDamageString();
 	}
 	
