@@ -84,11 +84,12 @@
 	var twoHanded = true;
 	var additionalWeaponDamage = 1;
 	var secondaryPowerAttackBuffApplies = true;
-	var vitalStrikeType = 'Mythic';
+	var vitalStrikeType = 'Basic';
 	var powerAttackType = 'Mythic';
 	var attackRollModifier = 0;
 	var critMultiplier = 2;
 	var additionalAttackBonus = 6;
+	var vitalStrikeIsMythic = true;
 	
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
 	$( document ).ready(function(){
@@ -170,22 +171,21 @@
 	function getVitalStrikeMultiplier(strikeType)
 	{
 		strikeType = strikeType.toLowerCase();
+		var multiplier = 1;
+		
 		if(strikeType == 'basic')
 		{
-			return 2;
-		}
-		else if(strikeType == 'mythic')
-		{
-			return baseWeaponDice * 2;
+			multiplier = 2;
 		}
 		else if(strikeType == 'improved')
 		{
-			return 3;
+			multiplier = 3;
 		}
 		else if(strikeType == 'greater')
 		{
-			return 4;
+			multiplier = 4;
 		}
+		return multiplier;
 	}
 	
 	function getPowerAttackValues(attackType)
@@ -241,32 +241,6 @@
 		$('#secondaryPowerAttackBonus').val(powerAttackMod.bonusDamageMod);
 	}
 	
-	function getVitalStrikeValues(attackType)
-	{
-		attackType = attackType.toLowerCase();
-		
-		var thisAdjustment = new combatAdjustment();
-		
-		if(strikeType == 'basic')
-		{
-
-		}
-		else if(strikeType == 'mythic')
-		{
-
-		}
-		else if(strikeType == 'improved')
-		{
-
-		}
-		else if(strikeType == 'greater')
-		{
-		
-		}
-		
-		return thisAdjustment;
-				
-	}
 	
 	//uses all the set values to calculate the total damage for the mythic vital power attack.
 	function calcDamageString()
@@ -320,7 +294,7 @@
 		
 		//calculation of the additional vital strike damage is tricky. Mythic vital strike includes all bonuses before multiplication. Other vital strikes do not.
 		var finalDamageBonus = damageBonus;
-		if(vitalStrikeType == 'Mythic')
+		if(vitalStrikeIsMythic)
 		{
 			writeLogEntry('Vital Strike is mythic teir. Multiplying damage bonus by mythic vital strike multiplier');
 			
@@ -416,14 +390,17 @@
 			<td>
 				<select name="vitalStrikeType" id="vitalStrikeType">
 					<option>Basic</option>
-					<option>Mythic</option>
 					<option>Improved</option>
 					<option>Greater</option>
 				</select>
 			</td>
 			<td>What Tier is the vital strike at?</td>
 		</tr>
-
+		<tr>
+			<td>Mythic Vital Strike?</td>
+			<td><input name="vitalStrikeIsMythic" id="vitalStrikeIsMythic" data-bound="true" type="checkbox"></td>
+			<td>Is this vital strike mythic?</td>
+		</tr>	
 		<tr>
 			<td>Base Strength Bonus</td>
 			<td><input name="strengthBonus" data-bound="true" type="number"></td>
