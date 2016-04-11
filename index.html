@@ -271,6 +271,7 @@
 	//uses all the set values to calculate the total damage for the mythic vital power attack.
 	function calcDamageString()
 	{
+		$('#log').html(null);
 		writeLogEntry('Running Calculations...');
 		
 		//total strength bonus is base strength plus rage strength
