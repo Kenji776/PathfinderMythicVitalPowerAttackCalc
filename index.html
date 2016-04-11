@@ -73,24 +73,25 @@
 <script>
 
 	//set default values for the form.
+	var userVars = new Object();
 	
-	var basePowerAttackDamage = 0; // gain  a  +6  bonus  on  all  melee damage rolls
-	var secondaryPowerAttackBonus = 0; //This  bonus  to  damage  is increased by half (+50%) if you are making an attack with a two-handed weapon
-	var strengthBonus = 6; //char sheet
-	var baseAttackBonus = 8;
-	var baseWeaponDice = 1; //bardich has 1 attack dice normally. 
-	var additionalStrengthBonus = 2; //get two additional strength from rage (just set to 0 if not raging)
-	var diceType = 'D10'; //what kind of dice the weapon rolls
-	var twoHanded = true;
-	var additionalWeaponDamage = 1;
-	var secondaryPowerAttackBuffApplies = true;
-	var vitalStrikeType = 'Basic';
-	var powerAttackType = 'Mythic';
-	var attackRollModifier = 0;
-	var critMultiplier = 2;
-	var additionalAttackBonus = 6;
-	var vitalStrikeIsMythic = true;
-	var applyFuriousFocus = true;
+	userVars.basePowerAttackDamage = 0; // gain  a  +6  bonus  on  all  melee damage rolls
+	userVars.secondaryPowerAttackBonus = 0; //This  bonus  to  damage  is increased by half (+50%) if you are making an attack with a two-handed weapon
+	userVars.strengthBonus = 6; //char sheet
+	userVars.baseAttackBonus = 8;
+	userVars.baseWeaponDice = 1; //bardich has 1 attack dice normally. 
+	userVars.additionalStrengthBonus = 2; //get two additional strength from rage (just set to 0 if not raging)
+	userVars.diceType = 'D10'; //what kind of dice the weapon rolls
+	userVars.twoHanded = true;
+	userVars.additionalWeaponDamage = 1;
+	userVars.secondaryPowerAttackBuffApplies = true;
+	userVars.vitalStrikeType = 'Basic';
+	userVars.powerAttackType = 'Mythic';
+	userVars.attackRollModifier = 0;
+	userVars.critMultiplier = 2;
+	userVars.additionalAttackBonus = 6;
+	userVars.vitalStrikeIsMythic = true;
+	userVars.applyFuriousFocus = true;
 	
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
 	$( document ).ready(function(){
@@ -99,13 +100,13 @@
 			{
 				var boundVar = $(this).attr('name');
 				
-				$(this).val(parseFloat(window[boundVar].toPrecision(4)));
+				$(this).val(parseFloat(userVars[boundVar].toPrecision(4)));
 				
 				
 				$(this).bind('keyup change',function(){
 					var boundVar = $(this).attr('name');
 					
-					window[boundVar] = parseFloat($(this).val());
+					userVars[boundVar] = parseFloat($(this).val());
 					
 					calcDamageString();
 				});
@@ -125,25 +126,25 @@
 			$(this).click(function(){
 				var boundVar = $(this).attr('name');
 				
-				window[boundVar] = $(this).is(":checked");
+				userVars[boundVar] = $(this).is(":checked");
 				
 				calcDamageString();
 			});
 		});
 		
 		$('#diceType').val(diceType).change(function(){
-			diceType = $(this).val();
+			userVars.diceType = $(this).val();
 			calcDamageString();
 		});
 
-		$('#powerAttackType').val(powerAttackType).change(function(){
-			powerAttackType = $(this).val();
-			setPowerAttackValuesInForm(powerAttackType);
+		$('#powerAttackType').val(userVars.powerAttackType).change(function(){
+			userVars.powerAttackType = $(this).val();
+			setPowerAttackValuesInForm(userVars.powerAttackType);
 			calcDamageString();
 		});
 		
-		$('#vitalStrikeType').val(vitalStrikeType).change(function(){
-			vitalStrikeType = $(this).val();
+		$('#vitalStrikeType').val(userVars.vitalStrikeType).change(function(){
+			userVars.vitalStrikeType = $(this).val();
 			calcDamageString();
 		});		
 		
@@ -163,8 +164,49 @@
 		
 	})
 
+	function assignValuesFromUrl()
+	{
+		var urlParams = readValuesFromUrl();
+		
+		for(param in urlParams)
+		{
+			if(window.hasOwnProperty(param))
+			{
+				console.log('Assigning url param ' + param + ' to local variable');
+				
+				userVars[param] = urlParams[param];
+			}
+		}
+	}
+	
+	function generateUrlString()
+	{
+		url = window.location.hostname;
+		
+		for(key in userVars)
+		{
+			url += '&'+key+'='+userVars[key];
+		}
+		
+		return url;
+	}
+	
+	function readValuesFromUrl()
+	{
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;	
+	}
+	
 	function init()
 	{
+		//assignValuesFromUrl();
 		setPowerAttackValuesInForm($('#powerAttackType').val());
 		calcDamageString();
 	}
@@ -200,11 +242,11 @@
 		{
 			attackRollModifier--;
 			basePowerAttackDamage = 2;
-			var powerAttackLevel = Math.floor(baseAttackBonus / 4);
+			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
 			basePowerAttackDamage += powerAttackLevel * 2;
 			attackRollModifier += -1 * powerAttackLevel;
 			
-			if(secondaryPowerAttackBuffApplies)
+			if(userVars.secondaryPowerAttackBuffApplies)
 			{
 				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
 			}
@@ -216,11 +258,11 @@
 		{
 			attackRollModifier--;
 			basePowerAttackDamage = 3;
-			var powerAttackLevel = Math.floor(baseAttackBonus / 4);
+			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
 			basePowerAttackDamage += powerAttackLevel * 3;
-			attackRollModifier += -1 * powerAttackLevel;
+			attackRollModifier += -1 * userVars.powerAttackLevel;
 			
-			if(secondaryPowerAttackBuffApplies)
+			if(userVars.secondaryPowerAttackBuffApplies)
 			{
 				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
 			}
@@ -256,11 +298,11 @@
 		writeLogEntry('Running Calculations...');
 		
 		//total strength bonus is base strength plus rage strength
-		var totalStrengthBonus = strengthBonus + additionalStrengthBonus;
+		var totalStrengthBonus = userVars.strengthBonus + userVars.additionalStrengthBonus;
 	
-		writeLogEntry('Total Strength Calculated as strength bonus + additionalStrengthBonus: ' + strengthBonus + ' + ' + additionalStrengthBonus + ' = ' + totalStrengthBonus);
+		writeLogEntry('Total Strength Calculated as strength bonus + additionalStrengthBonus: ' + userVars.strengthBonus + ' + ' + userVars.additionalStrengthBonus + ' = ' + totalStrengthBonus);
 		
-		var vitalStrikeMultiplier = getVitalStrikeMultiplier(vitalStrikeType)
+		var vitalStrikeMultiplier = getVitalStrikeMultiplier(userVars.vitalStrikeType)
 
 		writeLogEntry('Got Mythic Vital Strike Multiplier of: ' + vitalStrikeMultiplier);
 		
@@ -269,20 +311,21 @@
 		var attackRollMod = 0;
 		
 		//if the weapon is being weilded two handed a 1.5 strength buff is applied.
-		if(twoHanded)
+		if(userVars.twoHanded)
 		{
 			totalStrengthBonus = totalStrengthBonus * 1.5; //when using two handed weapon strength is multiplied by 1.5 //http://www.d20pfsrd.com/gamemastering/combat#TOC-Damage
 			
 			writeLogEntry('Two handed strength bonus applied. Strength multiplied by 1.5. Strength is now: ' + totalStrengthBonus);
 		}
+	
 		
 		//the number of dice rolled for the damage is the base number of dice times 2
-		var numDice = baseWeaponDice * vitalStrikeMultiplier; 
+		var numDice = userVars.baseWeaponDice * vitalStrikeMultiplier; 
 
-		writeLogEntry('Number of weapon dice is calculated as base weapon dice * vital strike multiplier: ' + baseWeaponDice + ' * ' + vitalStrikeMultiplier + ' = ' + numDice);
+		writeLogEntry('Number of weapon dice is calculated as base weapon dice * vital strike multiplier: ' + userVars.baseWeaponDice + ' * ' + vitalStrikeMultiplier + ' = ' + numDice);
 		
 		//get the combat modifiers for power attack
-		var powerAttackMod = getPowerAttackValues(powerAttackType);
+		var powerAttackMod = getPowerAttackValues(userVars.powerAttackType);
 		
 		writeLogEntry('Got Power Attack Modifiers...');
 		writeLogEntry('Power Attack Base Damage bonus: ' +  powerAttackMod.baseDamageMod);
@@ -290,7 +333,9 @@
 		writeLogEntry('Power Attack Attack Roll Mod: ' + powerAttackMod.attackMod);
 		writeLogEntry('Power Attack Critical Hit Additional Damage (pre multiplied): ' + powerAttackMod.critMod);
 		
-		if(applyFuriousFocus)
+		
+		
+		if(userVars.applyFuriousFocus)
 		{
 			writeLogEntry('Character has furious focus feat. Does not take attack roll penalty from power attack');
 		}
@@ -298,9 +343,14 @@
 			writeLogEntry('Character takes ' + powerAttackMod.attackMod + ' to attack roll from power attack');
 		}
 		//the final damage bonus is calculated as such
-		var damageBonus = totalStrengthBonus + powerAttackMod.baseDamageMod + powerAttackMod.bonusDamageMod + additionalWeaponDamage;
+		console.log('damage bonus stats');
+		console.log(totalStrengthBonus);
+		console.log(powerAttackMod.baseDamageMod);
+		console.log(powerAttackMod.bonusDamageMod);
+		console.log(userVars.additionalWeaponDamage);
+		var damageBonus = totalStrengthBonus + powerAttackMod.baseDamageMod + powerAttackMod.bonusDamageMod + userVars.additionalWeaponDamage;
 		
-		writeLogEntry('Total Damage Bonus Calculated as total strength bonus + power attack base damage + power attack bonus damage + additional weapon damage: ' + totalStrengthBonus + ' + ' + powerAttackMod.baseDamageMod + ' + ' +  powerAttackMod.bonusDamageMod + ' + ' +  additionalWeaponDamage + ' = ' + damageBonus);
+		writeLogEntry('Total Damage Bonus Calculated as total strength bonus + power attack base damage + power attack bonus damage + additional weapon damage: ' + totalStrengthBonus + ' + ' + powerAttackMod.baseDamageMod + ' + ' +  powerAttackMod.bonusDamageMod + ' + ' +  userVars.additionalWeaponDamage + ' = ' + damageBonus);
 		
 		//power attacks damage is doubled before being multiplied by crit
 		criticalHitMod += powerAttackMod.critMod;
@@ -308,7 +358,8 @@
 		
 		//calculation of the additional vital strike damage is tricky. Mythic vital strike includes all bonuses before multiplication. Other vital strikes do not.
 		var finalDamageBonus = damageBonus;
-		if(vitalStrikeIsMythic)
+		console.log('Final damage bonus end -1' + finalDamageBonus);
+		if(userVars.vitalStrikeIsMythic)
 		{
 			writeLogEntry('Vital Strike is mythic teir. Multiplying damage bonus by mythic vital strike multiplier');
 			
@@ -321,17 +372,22 @@
 			writeLogEntry('Non mythic vital strike. Not multiplying damages');
 		}
 		//put it into a string.
-		var resultDamageString = numDice + ' ' + diceType + ' + ' + finalDamageBonus;
+		console.log('Final damage bonus end ' + finalDamageBonus);
+		var resultDamageString = numDice + ' ' + userVars.diceType + ' + ' + finalDamageBonus;
 		
 		//additional dice from vital strike are not included in crit calculations.
-		var resultCritString = numDice + ' ' + diceType + ' + ' + (finalDamageBonus + criticalHitMod) * critMultiplier;
+		var resultCritString = numDice + ' ' + userVars.diceType + ' + ' + (finalDamageBonus + criticalHitMod) * userVars.critMultiplier;
 		
-		writeLogEntry('Calculated crit bonus as (final damage bonus + criticalHitMod) * critMultiplier: ('+finalDamageBonus+ ' + ' + criticalHitMod + ') * ' + critMultiplier + ' = ' +  (finalDamageBonus + criticalHitMod) * critMultiplier);
+		writeLogEntry('Calculated crit bonus as (final damage bonus + criticalHitMod) * critMultiplier: ('+finalDamageBonus+ ' + ' + criticalHitMod + ') * ' + userVars.critMultiplier + ' = ' +  (finalDamageBonus + criticalHitMod) * userVars.critMultiplier);
 		
-		var attackRollTotal = baseAttackBonus + additionalAttackBonus + attackRollMod;
+		var attackRollTotal = userVars.baseAttackBonus + userVars.additionalAttackBonus + attackRollMod;
 		$('#output').html('Base Damage Roll: ' + resultDamageString + '<br/>');
 		$('#output').append('Critical Hit Roll: ' + resultCritString + '<br/>');
 		$('#output').append('Attack Roll: 1D20 + ' + attackRollTotal);
+		
+		var linkUrl = generateUrlString();
+		
+		$('#hotLinkUrl').html('<a href="'+linkUrl+'">'+linkUrl+'</a>');
 	}
 	
 	function combatAdjustment()
@@ -500,6 +556,10 @@
 		<h2>Calculation Log</h2>
 		
 		<div id="log"></div>
+	</div>	
+	
+	<div>
+		Bookmark URL: <span id="hotLinkUrl"></span>
 	</div>	
 </body>
 </html>
