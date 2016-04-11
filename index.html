@@ -1,0 +1,637 @@
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<style>
+		h1, h2
+		{
+			color: #444444;
+			text-shadow: 3px 3px 3px #CCCCCC;
+			font-family: Verdana;
+		}
+		pre
+		{
+			font-family:Helvetica, Arial, sans-serif
+		}
+		.log
+		{
+			height: 300px;
+			overflow:scroll;
+		}
+		.logEntry
+		{
+			display:block;
+			line-height: 25px;
+		}
+		a{
+			text-decoration:none;
+		}
+		table { 
+		color: #333;
+		font-family: Helvetica, Arial, sans-serif;
+		width: 100%; 
+		border-collapse: 
+		collapse; border-spacing: 0; 
+		}
+
+		td, th { 
+		border: 1px solid transparent; /* No more visible border */
+		height: 30px; 
+		transition: all 0.3s;  /* Simple transition for hover effect */
+		}
+		th {
+		background: #DFDFDF;  /* Darken header a bit */
+		font-weight: bold;
+		}
+		td {
+		background: #FAFAFA;
+		text-align: left;
+		padding: 7px;
+		height:45px;
+
+		}
+
+		/* Cells in even rows (2,4,6...) are one color */ 
+		tr:nth-child(even) td { background: #F1F1F1; }   
+
+		/* Cells in odd rows (1,3,5...) are another (excludes header cells)  */ 
+		tr:nth-child(odd) td { background: #FEFEFE; }  
+
+		tr td:hover { background: #666; color: #FFF; } /* Hover cell effect! */
+
+		input, select{
+		  padding: 10px;
+		  border: solid 1px #dcdcdc;
+		  transition: box-shadow 0.3s, border 0.3s;
+		  width:100%;
+		}
+		input:focus,
+		input.focus,
+		select:focus{
+		  border: solid 1px #707070;
+		  box-shadow: 0 0 5px 1px #969696;
+		}		
+	</style>
+<script>
+
+	//set default values for the form.
+	var userVars = new Object();
+	userVars.charName = 'Erigdush';
+	userVars.weaponName = 'Bardiche';
+	userVars.strengthBonus = 6; //char sheet
+	userVars.baseAttackBonus = 8;
+	userVars.baseWeaponDice = 1; //bardich has 1 attack dice normally. 
+	userVars.additionalStrengthBonus = 2; //get two additional strength from rage (just set to 0 if not raging)
+	userVars.diceType = 'D10'; //what kind of dice the weapon rolls
+	userVars.twoHanded = true;
+	userVars.additionalWeaponDamage = 1;
+	userVars.secondaryPowerAttackBuffApplies = true;
+	userVars.vitalStrikeType = 'Basic';
+	userVars.powerAttackType = 'Mythic';
+	userVars.critMultiplier = 2;
+	userVars.additionalAttackBonus = 6;
+	userVars.vitalStrikeIsMythic = true;
+	userVars.applyFuriousFocus = true;
+	
+	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
+	$( document ).ready(function(){
+		assignValuesFromUrl();
+
+		$('input[data-bound="true"][type="text"]').each(function(){
+			try
+			{
+				var boundVar = $(this).attr('name');
+				
+				$(this).val(userVars[boundVar]);
+				
+				
+				$(this).bind('keyup change',function(){
+					var boundVar = $(this).attr('name');
+					
+					userVars[boundVar] = $(this).val();
+					
+					console.log('Calling calculate damage done from generic input field');
+					
+					calcDamageString();
+				});
+			}
+			catch(ex)
+			{
+				console.log('Error');
+				console.log(ex);
+			}
+		});
+		
+		$('input[data-bound="true"][type="number"]').each(function(){
+			try
+			{
+				var boundVar = $(this).attr('name');
+				
+				$(this).val(parseFloat(userVars[boundVar]));
+				
+				
+				$(this).bind('keyup change',function(){
+					var boundVar = $(this).attr('name');
+					
+					userVars[boundVar] = parseFloat($(this).val());
+					
+					console.log('Calling calculate damage done from number field change');
+					
+					calcDamageString();
+				});
+			}
+			catch(ex)
+			{
+				console.log('Error');
+				console.log(ex);
+			}
+		});
+
+		$('input[data-bound="true"][type="checkbox"]').each(function(){
+			
+			
+			
+			var boundVar = $(this).attr('name');
+			
+
+			$(this).prop('checked',userVars[boundVar]);
+					
+			$(this).click(function(){
+				console.log('Checkbox clicked');
+				
+				var boundVar = $(this).attr('name');
+				
+				userVars[boundVar] = $(this).is(":checked");
+				
+				console.log('Calling calculate damage done from checkbox change');
+				
+				calcDamageString();
+			});
+		});
+		
+		//if the two handed checkbox is checked, the secondary power attack bonus must be checked as well.
+		$('#twoHanded').click(function(){
+			if($(this).is(":checked"))
+			{
+				secondaryPowerAttackBuffApplies = true;
+				$('#secondaryPowerAttackBuffApplies').prop('checked',true).attr('disabled',true).attr('title','Locked because two handed is checked');
+				$('#powerAttackBuff').show();
+			}
+			else
+			{
+				$('#secondaryPowerAttackBuffApplies').removeAttr('disabled',true).removeAttr('title','Locked because two handed is checked');
+			}
+		}).click();
+		
+		$('#diceType').val(userVars.diceType).change(function(){
+			userVars.diceType = $(this).val();
+			console.log('Calling calculate damage done from diceType change');
+			calcDamageString();
+		});
+
+		$('#powerAttackType').val(userVars.powerAttackType).change(function(){
+			userVars.powerAttackType = $(this).val();
+			setPowerAttackValuesInForm(userVars.powerAttackType);
+		});
+		
+		$('#vitalStrikeType').val(userVars.vitalStrikeType).change(function(){
+			userVars.vitalStrikeType = $(this).val();
+		});		
+
+		
+		$('#secondaryPowerAttackBuffApplies').click(function(){
+			if($(this).is(":checked"))
+			{
+				$('#powerAttackBuff').show();
+			}
+			else
+			{
+				$('#powerAttackBuff').hide();
+			}
+		});
+		
+		init();
+		
+	})
+
+	function assignValuesFromUrl()
+	{
+		var urlParams = readValuesFromUrl();
+
+		for(param in urlParams)
+		{
+			if(userVars.hasOwnProperty(param))
+			{
+				var urlVal = decodeURIComponent( urlParams[param] );
+				
+				if(typeof userVars[param] == 'number')
+				{
+					userVars[param] = parseFloat(urlVal);
+				}
+				else if(typeof userVars[param] == 'boolean')
+				{
+					userVars[param] = urlVal == "true" ? true : false;
+				}
+				else
+				{
+					userVars[param] = urlVal;
+				}
+			}
+		}
+	}
+	
+	function generateUrlString()
+	{
+		url =  window.location.protocol + "//" +window.location.host +''+ window.location.pathname +'?saved=true';
+		
+		for(key in userVars)
+		{
+			url += '&'+key+'='+encodeURIComponent(userVars[key]);
+		}
+		
+		return url;
+	}
+	
+	function readValuesFromUrl()
+	{
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;	
+	}
+	
+	function init()
+	{
+		
+		setPowerAttackValuesInForm($('#powerAttackType').val());
+		
+		console.log('Calling calculate damage done from init');
+		
+		calcDamageString();
+	}
+	
+	function getVitalStrikeMultiplier(strikeType)
+	{
+		strikeType = strikeType.toLowerCase();
+		var multiplier = 1;
+		
+		if(strikeType == 'basic')
+		{
+			multiplier = 2;
+		}
+		else if(strikeType == 'improved')
+		{
+			multiplier = 3;
+		}
+		else if(strikeType == 'greater')
+		{
+			multiplier = 4;
+		}
+		return multiplier;
+	}
+	
+	function getPowerAttackValues(attackType)
+	{
+		attackType = attackType.toLowerCase();
+		var attackRollModifier = 0;
+		
+		var thisAdjustment = new combatAdjustment();
+		
+		if(attackType == 'basic')
+		{
+			attackRollModifier--;
+			basePowerAttackDamage = 2;
+			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
+			basePowerAttackDamage += powerAttackLevel * 2;
+			attackRollModifier += -1 * powerAttackLevel;
+			var powerAttackDamageBonus = 0;
+			if(userVars.secondaryPowerAttackBuffApplies)
+			{
+				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
+			}
+			thisAdjustment.attackMod = attackRollModifier;
+			thisAdjustment.baseDamageMod = basePowerAttackDamage;
+			thisAdjustment.bonusDamageMod = powerAttackDamageBonus;	
+		}
+		else if(attackType == 'mythic')
+		{
+			console.log('Calculating power attack vals ' + userVars.baseAttackBonus);
+			attackRollModifier--;
+			basePowerAttackDamage = 3;
+			var powerAttackLevel = Math.floor(userVars.baseAttackBonus / 4);
+			basePowerAttackDamage += powerAttackLevel * 3;
+			attackRollModifier += -1 * powerAttackLevel;
+			var powerAttackDamageBonus = 0;
+
+			if(userVars.secondaryPowerAttackBuffApplies)
+			{
+				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
+			}
+
+			thisAdjustment.attackMod = attackRollModifier;
+			thisAdjustment.baseDamageMod = basePowerAttackDamage;
+			thisAdjustment.bonusDamageMod = powerAttackDamageBonus;	
+			thisAdjustment.critMod = (thisAdjustment.baseDamageMod + thisAdjustment.bonusDamageMod) * 2;
+		}
+		
+		//furious focus feat negates attack roll debuff
+		if(userVars.applyFuriousFocus)
+		{
+			thisAdjustment.attackMod = 0;
+		}
+		setPowerAttackValuesInForm(thisAdjustment);
+		return thisAdjustment;
+	}
+	
+	function setPowerAttackValuesInForm(powerAttack)
+	{
+		$('#basePowerAttackDamage').val(powerAttack.baseDamageMod);
+		$('#secondaryPowerAttackBonus').val(powerAttack.bonusDamageMod);
+	}
+	
+	
+	//uses all the set values to calculate the total damage for the mythic vital power attack.
+	function calcDamageString()
+	{
+		console.log('Calculate damage string called');
+		$('#log').html(null);
+		writeLogEntry('Running Calculations...');
+		
+		//total strength bonus is base strength plus rage strength
+		var totalStrengthBonus = userVars.strengthBonus + userVars.additionalStrengthBonus;
+	
+		writeLogEntry('Total Strength Calculated as strength bonus + additionalStrengthBonus: ' + userVars.strengthBonus + ' + ' + userVars.additionalStrengthBonus + ' = ' + totalStrengthBonus);
+		
+		var vitalStrikeMultiplier = getVitalStrikeMultiplier(userVars.vitalStrikeType)
+
+		writeLogEntry('Got Mythic Vital Strike Multiplier of: ' + vitalStrikeMultiplier);
+		
+		//mythic power attack will add additional damage before crit is calculated on critical hits
+		var criticalHitMod = 0;
+		var attackRollMod = 0;
+		
+		//if the weapon is being weilded two handed a 1.5 strength buff is applied.
+		if(userVars.twoHanded)
+		{
+			totalStrengthBonus = totalStrengthBonus * 1.5; //when using two handed weapon strength is multiplied by 1.5 //http://www.d20pfsrd.com/gamemastering/combat#TOC-Damage
+			
+			writeLogEntry('Two handed strength bonus applied. Strength multiplied by 1.5. Strength is now: ' + totalStrengthBonus);
+		}
+	
+		
+		//the number of dice rolled for the damage is the base number of dice times 2
+		var numDice = userVars.baseWeaponDice * vitalStrikeMultiplier; 
+
+		writeLogEntry('Number of weapon dice is calculated as base weapon dice * vital strike multiplier: ' + userVars.baseWeaponDice + ' * ' + vitalStrikeMultiplier + ' = ' + numDice);
+		
+		//get the combat modifiers for power attack
+		var powerAttackMod = getPowerAttackValues(userVars.powerAttackType);
+		
+		writeLogEntry('Got Power Attack Modifiers...');
+		writeLogEntry('Power Attack Base Damage bonus: ' +  powerAttackMod.baseDamageMod);
+		writeLogEntry('Power Attack Additional Damage: ' + powerAttackMod.bonusDamageMod); 
+		writeLogEntry('Power Attack Attack Roll Mod: ' + powerAttackMod.attackMod);
+		writeLogEntry('Power Attack Critical Hit Additional Damage (pre multiplied): ' + powerAttackMod.critMod);
+		
+		
+		
+		if(userVars.applyFuriousFocus == true)
+		{
+			writeLogEntry('Character has furious focus feat. Does not take attack roll penalty from power attack');
+		}
+		else{
+			writeLogEntry('Character takes ' + powerAttackMod.attackMod + ' to attack roll from power attack');
+		}
+		//the final damage bonus is calculated as such
+		var damageBonus = totalStrengthBonus + powerAttackMod.baseDamageMod + powerAttackMod.bonusDamageMod + userVars.additionalWeaponDamage;
+		
+		writeLogEntry('Total Damage Bonus Calculated as total strength bonus + power attack base damage + power attack bonus damage + additional weapon damage: ' + totalStrengthBonus + ' + ' + powerAttackMod.baseDamageMod + ' + ' +  powerAttackMod.bonusDamageMod + ' + ' +  userVars.additionalWeaponDamage + ' = ' + damageBonus);
+		
+		//power attacks damage is doubled before being multiplied by crit
+		criticalHitMod += powerAttackMod.critMod;
+		attackRollMod += powerAttackMod.attackMod;
+		
+		//calculation of the additional vital strike damage is tricky. Mythic vital strike includes all bonuses before multiplication. Other vital strikes do not.
+		var finalDamageBonus = damageBonus;
+
+		if(userVars.vitalStrikeIsMythic)
+		{
+			writeLogEntry('Vital Strike is mythic tier. Multiplying damage bonus by mythic vital strike multiplier');
+			
+			var finalDamageBonus = damageBonus * vitalStrikeMultiplier;
+			
+			writeLogEntry('Final damage bonus was calculated as damage bonus * vital strike multiplier: ' + damageBonus + ' * ' + vitalStrikeMultiplier + ' = ' + finalDamageBonus);		
+		}
+		else
+		{
+			writeLogEntry('Non mythic vital strike. Not multiplying damages');
+		}
+		//put it into a string.
+
+		var resultDamageString = numDice + ' ' + userVars.diceType + ' + ' + finalDamageBonus;
+		
+		//additional dice from vital strike are not included in crit calculations.
+		var resultCritString = numDice + ' ' + userVars.diceType + ' + ' + (finalDamageBonus + criticalHitMod) * userVars.critMultiplier;
+		
+		writeLogEntry('Calculated crit bonus as (final damage bonus + criticalHitMod) * critMultiplier: ('+finalDamageBonus+ ' + ' + criticalHitMod + ') * ' + userVars.critMultiplier + ' = ' +  (finalDamageBonus + criticalHitMod) * userVars.critMultiplier);
+		
+		var attackRollTotal = userVars.baseAttackBonus + userVars.additionalAttackBonus + attackRollMod;
+		$('#output').html('Base Damage Roll: ' + resultDamageString + '<br/>');
+		$('#output').append('Critical Hit Roll: ' + resultCritString + '<br/>');
+		$('#output').append('Attack Roll: 1 D20 + ' + attackRollTotal);
+		
+		var linkUrl = generateUrlString();
+		
+		$('#hotLinkUrl').html('<a href="'+linkUrl+'">'+linkUrl+'</a>');
+		
+		console.log('Calculating damage done');
+	}
+	
+	function combatAdjustment()
+	{
+		this.attackMod = 0;
+		this.baseDamageMod = 0;
+		this.bonusDamageMod = 0;
+		this.critMod = 0;
+	}
+	
+	function writeLogEntry(text)
+	{
+		$('#log').append('<span class="logEntry">'+text+'</span>');
+	}
+</script>
+<body>
+	<center>
+		<h1>Vital Strike Power Attack Calculator</h1>
+	</center>
+	<p>
+	<pre>
+	Power Attack
+
+	You can choose to take a -1 penalty on all melee attack rolls and combat maneuver checks to gain a +2 bonus on all melee damage rolls. This bonus to damage is 
+	increased by half (+50%) if you are making an attack with a two-handed weapon, a one handed weapon using two hands, or a primary natural weapon that adds 1-1/2 times your
+	Strength modifier on damage rolls. This bonus to damage is halved (–50%) if you are making an attack with an off-hand weapon or secondary natural weapon.
+	When your base attack bonus reaches +4, and every 4 points thereafter, the penalty increases by –1 and the bonus to damage increases by +2.
+	You must choose to use this feat before making an attack roll, and its effects last until your next turn. The bonus damage does not apply to touch attacks or effects 
+	that do not deal hit point damage.
+
+	Power Attack (Mythic)
+	
+	When you use Power Attack, you gain a +3 bonus on melee damage rolls instead of +2. When your base attack bonus reaches +4 and every 4 points thereafter, the amount of 
+	bonus damage increases by +3 instead of +2.
+	In addition, the bonus damage from this feat is doubled on a critical hit, before it's multiplied by the weapon's critical multiplier.
+	You can expend one use of mythic power when you activate Power Attack to ignore the penalties on melee attack rolls and combat maneuver checks for 1 minute	
+	
+	Vital Strike
+	
+	When you use the attack action, you can make one attack at your highest base attack bonus that deals additional damage. 
+	Roll the weapon's damage dice for the attack twice and add the results together before adding bonuses from Strength, weapon abilities (such as flaming), precision-based damage, and other damage bonuses. 
+	These extra weapon damage dice are not multiplied on a critical hit, but are added to the total.
+	
+	Vital Strike (Mythic)
+	
+	Benefit: Whenever you use Vital Strike, multiply the Strength bonus, magic bonus, and other bonuses that would normally be multiplied on a 
+	critical hit by the number of weapon damage dice you roll for that feat.
+	</pre>
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th width="20%">Attribute</th>
+				<th width="10%">Value</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tr>
+			<td>Character Name</td>
+			<td><input name="charName" id="charName" type="text" data-bound="true"></td>
+			<td>Name of this character. Used for generating bookmark link</td>
+		</tr>
+		<tr>
+			<td>Weapon Name</td>
+			<td><input name="weaponName" id="weaponName" type="text" data-bound="true"></td>
+			<td>What weapon is this calculation for. Used for generationg bookmark link</td>
+		</tr>		
+		<tr>
+			<td>Power Attack Type</td>
+			<td>
+				<select name="powerAttackType" id="powerAttackType">
+					<option>Basic</option>
+					<option>Mythic</option>
+				</select>
+			</td>
+			<td>What Tier is the power attack at?</td>
+		</tr>		
+		<tr>
+			<td>Vital Strike Type</td>
+			<td>
+				<select name="vitalStrikeType" id="vitalStrikeType">
+					<option>Basic</option>
+					<option>Improved</option>
+					<option>Greater</option>
+				</select>
+			</td>
+			<td>What Tier is the vital strike at?</td>
+		</tr>
+		<tr>
+			<td>Mythic Vital Strike?</td>
+			<td><input name="vitalStrikeIsMythic" id="vitalStrikeIsMythic" data-bound="true" type="checkbox"></td>
+			<td>Is this vital strike mythic?</td>
+		</tr>	
+		<tr>
+			<td>Apply Furious Focus Feat?</td>
+			<td><input name="applyFuriousFocus" id="applyFuriousFocus" data-bound="true" type="checkbox"></td>
+			<td>Does this character have furious focus? If so, the attack roll penalty from power attack is negated.</td>
+		</tr>	
+		<tr>
+			<td>Base Strength Bonus</td>
+			<td><input name="strengthBonus" data-bound="true" type="number"></td>
+			<td>Characters base strength bonus (strength ability modifier)</td>
+		</tr>	
+		<tr>
+			<td>Additional Strength Bonus</td>
+			<td><input name="additionalStrengthBonus" data-bound="true" type="number"></td>
+			<td>Characters additional strength from rage or other sources.</td>
+		</tr>
+		<tr>
+			<td>Base Attack Bonus</td>
+			<td><input name="baseAttackBonus" data-bound="true" type="number"></td>
+			<td>Characters base attack bonus.</td>
+		</tr>		
+		<tr>
+			<td>Additional Attack Bonus</td>
+			<td><input name="additionalAttackBonus" data-bound="true" type="number"></td>
+			<td>Additional attack roll bonuses from other sources such as rage, heroism, etc.</td>
+		</tr>		
+		<tr>
+			<td>Base Power Attack Damage</td>
+			<td><input name="basePowerAttackDamage" id="basePowerAttackDamage" data-bound="true" type="number" readonly="true"></td>
+			<td>Damage added to attack from power attack basic ability.</td>
+		</tr>
+		<tr>
+			<td>Secondary Power Attack Buff Applies?</td>
+			<td><input name="secondaryPowerAttackBuffApplies" id="secondaryPowerAttackBuffApplies" data-bound="true" type="checkbox"></td>
+			<td>Does the secondary power attack buff apply to this situation?</td>
+		</tr>			
+		<tr id="powerAttackBuff">
+			<td>Power Attack Additional Bonus</td>
+			<td><input name="secondaryPowerAttackBonus" id="secondaryPowerAttackBonus" data-bound="true" type="number" readonly="true"></td>
+			<td>Additional damage from power attack if char meets the additional conditions, such as wielding weapon two handed.</td>
+		</tr>
+		<tr>
+			<td>Number of Weapon Dice</td>
+			<td><input name="baseWeaponDice" data-bound="true" type="number"></td>
+			<td>The number of damage dice rolled for this weapon</td>
+		</tr>	
+		<tr>
+			<td>Two Handed?</td>
+			<td><input name="twoHanded" id="twoHanded" data-bound="true" type="checkbox"></td>
+			<td>Is the weapon being wielded two handed?</td>
+		</tr>		
+		<tr>
+			<td>Additional Weapon Damage</td>
+			<td><input name="additionalWeaponDamage" data-bound="true" type="number"></td>
+			<td>Additional damage weapon does from magic, enchantment, flaming, etc</td>
+		</tr>		
+		<tr>
+			<td>Critical Hit Multiplier</td>
+			<td><input name="critMultiplier" data-bound="true" type="number"></td>
+			<td>Multiplier for critical hits</td>
+		</tr>	
+		
+		<tr>
+			<td>Dice Type</td>
+			<td>
+				<select name="diceType" id="diceType">
+					<option>D4</option>
+					<option>D6</option>
+					<option>D8</option>
+					<option>D10</option>
+					<option>D12</option>
+					<option>D20</option>
+				</select>
+			</td>
+			<td>What kind of dice is rolled for this weapon</td>
+		</tr>	
+	</table>
+	
+	<center>
+		<h2><span id="output"></span></h2>
+	</center>
+
+	<div id="calculationLog">
+		<h2>Calculation Log</h2>
+		
+		<div id="log"></div>
+	</div>	
+	
+	<div>
+		<h2>Bookmark Link</h2> <span id="hotLinkUrl"></span>
+	</div>	
+</body>
+</html>
+
+
