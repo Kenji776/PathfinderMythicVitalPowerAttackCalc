@@ -290,6 +290,13 @@
 		writeLogEntry('Power Attack Attack Roll Mod: ' + powerAttackMod.attackMod);
 		writeLogEntry('Power Attack Critical Hit Additional Damage (pre multiplied): ' + powerAttackMod.critMod);
 		
+		if(applyFuriousFocus)
+		{
+			writeLogEntry('Character has furious focus feat. Does not take attack roll penalty from power attack');
+		}
+		else{
+			writeLogEntry('Character takes ' + powerAttackMod.attackMod + ' to attack roll from power attack');
+		}
 		//the final damage bonus is calculated as such
 		var damageBonus = totalStrengthBonus + powerAttackMod.baseDamageMod + powerAttackMod.bonusDamageMod + additionalWeaponDamage;
 		
