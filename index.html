@@ -146,9 +146,7 @@
 		});
 
 		$('input[data-bound="true"][type="checkbox"]').each(function(){
-			
-			
-			
+						
 			var boundVar = $(this).attr('name');
 			
 
@@ -166,7 +164,25 @@
 				calcDamageString();
 			});
 		});
-		
+
+		$('select[data-bound="true"]').each(function(){
+						
+			var boundVar = $(this).attr('name');
+			
+			$(this).val(userVars[boundVar]);
+					
+			$(this).click(function(){
+				console.log('select changed');
+				
+				var boundVar = $(this).attr('name');
+				
+				userVars[boundVar] = $(this).val();
+				
+				console.log('Calling calculate damage done from checkbox change');
+				
+				calcDamageString();
+			});
+		});		
 		//if the two handed checkbox is checked, the secondary power attack bonus must be checked as well.
 		$('#twoHanded').click(function(){
 			twoHandedHandler($(this).is(":checked"));
@@ -280,6 +296,8 @@
 	function getVitalStrikeMultiplier(strikeType)
 	{
 		strikeType = strikeType.toLowerCase();
+		
+		console.log('Getting vital strike multiplier for ' + strikeType);
 		var multiplier = 1;
 		
 		if(strikeType == 'basic')
@@ -522,7 +540,7 @@
 		<tr>
 			<td>Power Attack Type</td>
 			<td>
-				<select name="powerAttackType" id="powerAttackType">
+				<select name="powerAttackType" id="powerAttackType" data-bound="true">
 					<option>Basic</option>
 					<option>Mythic</option>
 				</select>
@@ -532,7 +550,7 @@
 		<tr>
 			<td>Vital Strike Type</td>
 			<td>
-				<select name="vitalStrikeType" id="vitalStrikeType">
+				<select name="vitalStrikeType" id="vitalStrikeType" data-bound="true">
 					<option>Basic</option>
 					<option>Improved</option>
 					<option>Greater</option>
