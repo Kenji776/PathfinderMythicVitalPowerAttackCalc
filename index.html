@@ -187,23 +187,7 @@
 		$('#twoHanded').click(function(){
 			twoHandedHandler($(this).is(":checked"));
 		});
-		
-		$('#diceType').val(userVars.diceType).change(function(){
-			userVars.diceType = $(this).val();
-			console.log('Calling calculate damage done from diceType change');
-			calcDamageString();
-		});
-
-		$('#powerAttackType').val(userVars.powerAttackType).change(function(){
-			userVars.powerAttackType = $(this).val();
-			setPowerAttackValuesInForm(userVars.powerAttackType);
-		});
-		
-		$('#vitalStrikeType').val(userVars.vitalStrikeType).change(function(){
-			userVars.vitalStrikeType = $(this).val();
-		});		
-
-		
+			
 		$('#secondaryPowerAttackBuffApplies').click(function(){
 			if($(this).is(":checked"))
 			{
@@ -631,7 +615,7 @@
 		<tr>
 			<td>Dice Type</td>
 			<td>
-				<select name="diceType" id="diceType">
+				<select name="diceType" id="diceType" data-bound="true">
 					<option>D4</option>
 					<option>D6</option>
 					<option>D8</option>
