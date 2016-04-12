@@ -423,11 +423,11 @@
 
 		if(userVars.vitalStrikeIsMythic)
 		{
-			writeLogEntry('Vital Strike is mythic tier. Multiplying damage bonus by mythic vital strike multiplier');
+			writeLogEntry('Vital Strike is mythic tier. Multiplying damage bonus by number of dice from vital strike');
 			
-			var finalDamageBonus = damageBonus * vitalStrikeMultiplier;
+			finalDamageBonus = damageBonus * numDice;
 			
-			writeLogEntry('Final damage bonus was calculated as damage bonus * vital strike multiplier: ' + damageBonus + ' * ' + vitalStrikeMultiplier + ' = ' + finalDamageBonus);		
+			writeLogEntry('Final damage bonus was calculated as damage bonus * vital strike multiplier: ' + damageBonus + ' * ' + numDice + ' = ' + finalDamageBonus);		
 		}
 		else
 		{
