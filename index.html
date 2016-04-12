@@ -383,9 +383,9 @@
 		//if the weapon is being weilded two handed a 1.5 strength buff is applied.
 		if(userVars.twoHanded)
 		{
-			totalStrengthBonus = totalStrengthBonus * 1.5; //when using two handed weapon strength is multiplied by 1.5 //http://www.d20pfsrd.com/gamemastering/combat#TOC-Damage
+			totalStrengthBonus = Math.floor(totalStrengthBonus * 1.5); //when using two handed weapon strength is multiplied by 1.5 //http://www.d20pfsrd.com/gamemastering/combat#TOC-Damage
 			
-			writeLogEntry('Two handed strength bonus applied. Strength multiplied by 1.5. Strength is now: ' + totalStrengthBonus);
+			writeLogEntry('Two handed strength bonus applied. Strength multiplied by 1.5 (rounded down). Strength is now: ' + totalStrengthBonus);
 		}
 	
 		
