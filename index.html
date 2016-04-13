@@ -94,7 +94,7 @@
 	userVars.additionalAttackBonus = 0;
 	userVars.vitalStrikeIsMythic = false;
 	userVars.applyFuriousFocus = false;
-	userVars.vitalStrikeMultiplierType = 'doubled';
+	userVars.vitalStrikeMultiplierType = 'stikeTier';
 	
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
 	$( document ).ready(function(){
@@ -435,32 +435,34 @@
 
 		if(userVars.vitalStrikeIsMythic)
 		{
+			writeLogEntry('Vital Strike is mythic tier. Calculating damage multipliers. Selected multiplier mode is: ' +userVars.vitalStrikeMultiplierType);
+
 			if(userVars.vitalStrikeMultiplierType == 'diceRolled')
-			{
-				writeLogEntry('Vital Strike is mythic tier. Multiplying damage bonus by number of dice from vital strike');
-				
+			{				
 				finalDamageBonus = damageBonus * numDice;
 				
 				writeLogEntry('Final damage bonus was calculated as damage bonus * num dice: ' + damageBonus + ' * ' + numDice + ' = ' + finalDamageBonus);		
 			}
-			else if(userVars.vitalStrikeMultiplierType == 'doubled')
+			else if(userVars.vitalStrikeMultiplierType == 'stikeTier')
 			{
-				writeLogEntry('Vital Strike is mythic tier. Doubling damage');
+				var multiplier = 1;
+				if(userVars.vitalStrikeType.toLowerCase() == 'basic')
+				{
+					multiplier = 2;
+				}
+				else if(userVars.vitalStrikeType.toLowerCase() == 'improved')
+				{
+					multiplier = 3;
+				}
+				else if(userVars.vitalStrikeType.toLowerCase() == 'greater')
+				{
+					multiplier = 4;
+				}
 				
-				finalDamageBonus = damageBonus * 2;
-			}
-			else if(userVars.vitalStrikeMultiplierType == 'tripled')
-			{
-				writeLogEntry('Vital Strike is mythic tier. Tripling damage');
+				writeLogEntry('Final damage bonus was calculated as damage bonus * num dice: ' + damageBonus + ' * ' + multiplier + ' = ' + finalDamageBonus);	
 				
-				finalDamageBonus = damageBonus * 3;
-			}			
-			else if(userVars.vitalStrikeMultiplierType == 'quadrupled')
-			{
-				writeLogEntry('Vital Strike is mythic tier. Quadroupling damage');
-				
-				finalDamageBonus = damageBonus * 4;
-			}		
+				finalDamageBonus = damageBonus * multiplier;
+			}	
 		}
 		else
 		{
@@ -553,7 +555,7 @@
 			<td>What weapon is this calculation for. Used for generationg bookmark link</td>
 		</tr>		
 		<tr>
-			<td>Power Attack Type</td>
+			<td>Power Attack Tier</td>
 			<td>
 				<select name="powerAttackType" id="powerAttackType" data-bound="true">
 					<option>Basic</option>
@@ -563,7 +565,7 @@
 			<td>What Tier is the power attack at?</td>
 		</tr>		
 		<tr>
-			<td>Vital Strike Type</td>
+			<td>Vital Strike Tier</td>
 			<td>
 				<select name="vitalStrikeType" id="vitalStrikeType" data-bound="true">
 					<option>Basic</option>
@@ -578,13 +580,11 @@
 			<td>
 				<select name="vitalStrikeMultiplierType" id="vitalStrikeMultiplierType" data-bound="true">
 					<option value="diceRolled">By Number of Dice</option>
-					<option value="doubled">Doubled</option>
-					<option value="tripled">Tripled</option>
-					<option value="quadrupled">Quadrupled</option>
+					<option value="stikeTier">By Vital Strike Tier</option>
 				</select>
 			</td>
 			<td>There is some debate as to how mythic vital strike damage is calculated. Some say that the additional damage is multiplied by the total number of dice rolled
-				and others say it is multiplied by the vital strike tier. You may choose the multiplier here, depending on the ruling of your GM</td>
+				and others say it is multiplied by the vital strike tier (2 for basic, 3 for improved, 4 for greater). You may choose the multiplier here, depending on the ruling of your GM</td>
 		</tr>
 		<tr>
 			<td>Mythic Vital Strike?</td>
