@@ -210,6 +210,7 @@
 		{
 			secondaryPowerAttackBuffApplies = true;
 			$('#secondaryPowerAttackBuffApplies').prop('checked',true).attr('disabled',true).attr('title','Locked because two handed is checked');
+			userVars.secondaryPowerAttackBuffApplies = true;
 			$('#powerAttackBuff').show();
 		}
 		else
@@ -302,6 +303,9 @@
 	
 	function getPowerAttackValues(attackType)
 	{
+		console.log('Getting power attack values');
+		console.log('Attack Type: ' + attackType);
+		console.log('Secondary bonus applies: ' + userVars.secondaryPowerAttackBuffApplies);
 		attackType = attackType.toLowerCase();
 		var attackRollModifier = 0;
 		
@@ -317,6 +321,7 @@
 			var powerAttackDamageBonus = 0;
 			if(userVars.secondaryPowerAttackBuffApplies)
 			{
+				console.log('Secondary bonus applies: ' +basePowerAttackDamage);
 				powerAttackDamageBonus = Math.floor(basePowerAttackDamage / 2);
 			}
 			thisAdjustment.attackMod = attackRollModifier;
@@ -560,22 +565,22 @@
 		</tr>		
 		<tr>
 			<td>Base Strength Bonus</td>
-			<td><input name="strengthBonus" data-bound="true" type="number"></td>
+			<td><input name="strengthBonus" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Characters base strength bonus (strength ability modifier)</td>
 		</tr>	
 		<tr>
 			<td>Additional Strength Bonus</td>
-			<td><input name="additionalStrengthBonus" data-bound="true" type="number"></td>
+			<td><input name="additionalStrengthBonus" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Characters additional strength from rage or other sources.</td>
 		</tr>
 		<tr>
 			<td>Base Attack Bonus</td>
-			<td><input name="baseAttackBonus" data-bound="true" type="number"></td>
+			<td><input name="baseAttackBonus" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Characters base attack bonus.</td>
 		</tr>		
 		<tr>
 			<td>Additional Attack Bonus</td>
-			<td><input name="additionalAttackBonus" data-bound="true" type="number"></td>
+			<td><input name="additionalAttackBonus" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Additional attack roll bonuses from other sources such as rage, heroism, etc.</td>
 		</tr>		
 		<tr>
@@ -598,18 +603,18 @@
 		</tr>
 		<tr>
 			<td>Number of Weapon Dice</td>
-			<td><input name="baseWeaponDice" data-bound="true" type="number"></td>
+			<td><input name="baseWeaponDice" data-bound="true" type="number" min="1" max="100"></td>
 			<td>The number of damage dice rolled for this weapon</td>
 		</tr>	
 		
 		<tr>
 			<td>Additional Weapon Damage</td>
-			<td><input name="additionalWeaponDamage" data-bound="true" type="number"></td>
+			<td><input name="additionalWeaponDamage" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Additional damage weapon does from magic, enchantment, flaming, etc</td>
 		</tr>		
 		<tr>
 			<td>Critical Hit Multiplier</td>
-			<td><input name="critMultiplier" data-bound="true" type="number"></td>
+			<td><input name="critMultiplier" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Multiplier for critical hits</td>
 		</tr>	
 		
