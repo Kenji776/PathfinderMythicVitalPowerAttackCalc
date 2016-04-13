@@ -78,22 +78,22 @@
 
 	//set default values for the form.
 	var userVars = new Object();
-	userVars.charName = 'Erigdush';
-	userVars.weaponName = 'Bardiche';
-	userVars.strengthBonus = 6; //char sheet
-	userVars.baseAttackBonus = 8;
-	userVars.baseWeaponDice = 1; //bardich has 1 attack dice normally. 
-	userVars.additionalStrengthBonus = 2; //get two additional strength from rage (just set to 0 if not raging)
+	userVars.charName = '';
+	userVars.weaponName = '';
+	userVars.strengthBonus = 0; //char sheet
+	userVars.baseAttackBonus = 0;
+	userVars.baseWeaponDice = 0; //bardich has 1 attack dice normally. 
+	userVars.additionalStrengthBonus = 0; //get two additional strength from rage (just set to 0 if not raging)
 	userVars.diceType = 'D10'; //what kind of dice the weapon rolls
-	userVars.twoHanded = true;
-	userVars.additionalWeaponDamage = 1;
-	userVars.secondaryPowerAttackBuffApplies = true;
+	userVars.twoHanded = false;
+	userVars.additionalWeaponDamage = 0;
+	userVars.secondaryPowerAttackBuffApplies = false;
 	userVars.vitalStrikeType = 'Basic';
-	userVars.powerAttackType = 'Mythic';
+	userVars.powerAttackType = 'Basic';
 	userVars.critMultiplier = 2;
-	userVars.additionalAttackBonus = 6;
-	userVars.vitalStrikeIsMythic = true;
-	userVars.applyFuriousFocus = true;
+	userVars.additionalAttackBonus = 0;
+	userVars.vitalStrikeIsMythic = false;
+	userVars.applyFuriousFocus = false;
 	userVars.vitalStrikeMultiplierType = 'doubled';
 	
 	//basically says whenever a form value is updated automatically update it's associated variable and rerun the calculations.
