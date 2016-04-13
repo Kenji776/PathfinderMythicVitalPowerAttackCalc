@@ -459,9 +459,11 @@
 					multiplier = 4;
 				}
 				
+				finalDamageBonus = damageBonus * multiplier;
+				
 				writeLogEntry('Final damage bonus was calculated as damage bonus * num dice: ' + damageBonus + ' * ' + multiplier + ' = ' + finalDamageBonus);	
 				
-				finalDamageBonus = damageBonus * multiplier;
+				
 			}	
 		}
 		else
