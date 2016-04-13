@@ -69,6 +69,9 @@
 		select:focus{
 		  border: solid 1px #707070;
 		  box-shadow: 0 0 5px 1px #969696;
+		}	
+		input:disabled {
+			background: #dddddd !important;
 		}		
 	</style>
 <script>
@@ -599,6 +602,14 @@
 			<td>Is the weapon being wielded two handed? If so the secondary power attack bonus will apply, and the char receives a 50% strength bonus.</td>
 		</tr>		
 		<tr>
+			<td>Secondary Power Attack Buff Applies?</td>
+			<td><input name="secondaryPowerAttackBuffApplies" id="secondaryPowerAttackBuffApplies" data-bound="true" type="checkbox"></td>
+			<td>Does the secondary power attack buff apply to this situation from the feat rule "This bonus to damage is 
+				increased by half (+50%) if you are making an attack with a two-handed weapon, a one handed weapon using two hands, or a primary natural weapon that adds 1-1/2 times your
+				Strength modifier on damage rolls"
+			</td>
+		</tr>	
+		<tr>
 			<td>Base Strength Bonus</td>
 			<td><input name="strengthBonus" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Characters base strength bonus (strength ability modifier)</td>
@@ -617,25 +628,8 @@
 			<td>Additional Attack Bonus</td>
 			<td><input name="additionalAttackBonus" data-bound="true" type="number" min="0" max="100"></td>
 			<td>Additional attack roll bonuses from other sources such as rage, heroism, etc.</td>
-		</tr>		
-		<tr>
-			<td>Base Power Attack Damage</td>
-			<td><input name="basePowerAttackDamage" id="basePowerAttackDamage" data-bound="true" type="number" readonly="true"></td>
-			<td>Damage added to attack from power attack basic ability. This is automatically calculated from your base attack bonus.</td>
 		</tr>
-		<tr>
-			<td>Secondary Power Attack Buff Applies?</td>
-			<td><input name="secondaryPowerAttackBuffApplies" id="secondaryPowerAttackBuffApplies" data-bound="true" type="checkbox"></td>
-			<td>Does the secondary power attack buff apply to this situation from the feat rule "This bonus to damage is 
-				increased by half (+50%) if you are making an attack with a two-handed weapon, a one handed weapon using two hands, or a primary natural weapon that adds 1-1/2 times your
-				Strength modifier on damage rolls"
-			</td>
-		</tr>			
-		<tr id="powerAttackBuff">
-			<td>Power Attack Additional Bonus</td>
-			<td><input name="secondaryPowerAttackBonus" id="secondaryPowerAttackBonus" data-bound="true" type="number" readonly="true"></td>
-			<td>Additional damage from power attack if char meets the additional conditions, such as wielding weapon two handed. This is automatically calculated.</td>
-		</tr>
+			
 		<tr>
 			<td>Number of Weapon Dice</td>
 			<td><input name="baseWeaponDice" data-bound="true" type="number" min="1" max="100"></td>
@@ -666,6 +660,17 @@
 				</select>
 			</td>
 			<td>What kind of dice is rolled for this weapon</td>
+		</tr>	
+		<tr>
+			<td>Base Power Attack Damage</td>
+			<td><input name="basePowerAttackDamage" id="basePowerAttackDamage" data-bound="true" type="number" readonly="true" disabled="true"></td>
+			<td>Damage added to attack from power attack basic ability. This is automatically calculated from your base attack bonus.</td>
+		</tr>
+	
+		<tr id="powerAttackBuff">
+			<td>Power Attack Additional Bonus</td>
+			<td><input name="secondaryPowerAttackBonus" id="secondaryPowerAttackBonus" data-bound="true" type="number" readonly="true" disabled="true"></td>
+			<td>Additional damage from power attack if char meets the additional conditions, such as wielding weapon two handed. This is automatically calculated.</td>
 		</tr>	
 	</table>
 	
