@@ -446,6 +446,18 @@
 				
 				finalDamageBonus = damageBonus * 2;
 			}
+			else if(userVars.vitalStrikeMultiplierType == 'tripled')
+			{
+				writeLogEntry('Vital Strike is mythic tier. Tripling damage');
+				
+				finalDamageBonus = damageBonus * 3;
+			}			
+			else if(userVars.vitalStrikeMultiplierType == 'quadrupled')
+			{
+				writeLogEntry('Vital Strike is mythic tier. Quadroupling damage');
+				
+				finalDamageBonus = damageBonus * 4;
+			}		
 		}
 		else
 		{
@@ -563,7 +575,9 @@
 			<td>
 				<select name="vitalStrikeMultiplierType" id="vitalStrikeMultiplierType" data-bound="true">
 					<option value="diceRolled">By Number of Dice</option>
-					<option value="doubled">Doubled Only</option>
+					<option value="doubled">Doubled</option>
+					<option value="tripled">Tripled</option>
+					<option value="quadrupled">Quadrupled</option>
 				</select>
 			</td>
 			<td>There is some debate as to how mythic vital strike damage is calculated. Some say that damage is multiplied by the total number of dice rolled
