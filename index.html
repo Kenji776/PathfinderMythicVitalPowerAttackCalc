@@ -476,7 +476,7 @@
 		
 		var crtiDice = userVars.baseWeaponDice * userVars.critMultiplier + numDice; 
 		
-		writeLogEntry('Calculated number of critical hit dice as (weapon dice * critMultiplier) + (weapon dice * vital strike multiplier): ('+userVars.baseWeaponDice+ ' * ' + userVars.critMultiplier + ')' + ' ('+userVars.baseWeaponDice+ ' * ' + userVars.critMultiplier + ') = ' + crtiDice);
+		writeLogEntry('Calculated number of critical hit dice as (weapon dice * critMultiplier) + (weapon dice * vital strike multiplier): ('+userVars.baseWeaponDice+ ' * ' + userVars.critMultiplier + ') + ' + ' ('+userVars.baseWeaponDice+ ' * ' + userVars.critMultiplier + ') = ' + crtiDice);
 		
 		//additional dice from vital strike are not included in crit calculations.
 		var resultCritString = crtiDice + ' ' + userVars.diceType + ' + ' + (finalDamageBonus + criticalHitMod) * userVars.critMultiplier;
